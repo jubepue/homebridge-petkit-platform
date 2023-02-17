@@ -1,0 +1,25 @@
+{
+    "bridge": {
+        "name": "homebridge-petkit-platform",
+        "username": "0E:78:B3:D4:BC:B7",
+        "port": 37876,
+        "pin": "034-85-687"
+    },
+
+    "description": "This is an Homebridge Plugin of Petkit.",
+
+    "platforms": [
+        {
+            "platform": "PetkitPlatform",
+            "name": "PetkitPlatform",
+            "options":
+              {
+                "username": "",
+                "password": "",
+                "lang": "es",
+                "countryCode": 34,
+                "debug":false
+              }
+        }
+    ]
+}

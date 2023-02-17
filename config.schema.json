@@ -1,0 +1,56 @@
+{
+  "pluginAlias": "PetkitPlatform",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "For documentation please see https://github.com/jubepue/petkit-homebridge .",
+  "footerDisplay": "",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "PetkitPlatform",
+        "description": "You shouldn't need to change this."
+      },
+      "options": {
+        "title": "",
+        "type": "object",
+        "required": true,
+        "properties": {
+          "username": {
+            "title": "Username",
+            "type": "string",
+            "required": true
+          },
+          "password": {
+            "title": "Password",
+            "type": "string",
+            "required": true
+          },
+          "lang": {
+            "title": "Language Code",
+            "type": "string",
+            "default": "en",
+            "description": "Your two letter language code",
+            "required": true
+          },
+          "countryCode": {
+            "title": "Country Code",
+            "type": "number",
+            "default": "",
+            "description": "Your two integer country code",
+            "required": true
+          },
+          "debug": {
+            "title": "Enable Debug Logging",
+            "type": "boolean",
+            "default": false,
+            "required": true
+          }
+        }
+      }
+    }
+  }
+}
