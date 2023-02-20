@@ -1,6 +1,6 @@
 {
   "name": "homebridge-petkit-platform",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge plugin for Petkit",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "license": "MIT",
   "homepage": "https://github.com/jubepue/homebridge-petkit",
   "engines": {
-    "node": ">=0.12.0",
+    "node": ">=14.0.0",
     "homebridge": ">=0.2.0"
   },
   "dependencies": {
