@@ -20,7 +20,7 @@ module.exports = function (homebridge) {
 class PetkitPlatform {
   constructor(log, config, api) {
     this.log = new LogUtil(
-      config.options.debug ? true : false;
+      (config.options.debug ? true : false);
     );
     this.config = config;
     if (!config || !config.options) {
