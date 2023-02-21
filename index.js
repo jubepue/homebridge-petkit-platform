@@ -19,16 +19,15 @@ module.exports = function (homebridge) {
 
 class PetkitPlatform {
   constructor(log, config, api) {
-    this.log = new LogUtil(
-      (config.options.debug ? true : false);
-    );
+    this.deviceAccessories = new Map();
+    this.accessories = new Map();
+
+    this.log = new LogUtil((config.options.debug) ? true : false);
     this.config = config;
-    if (!config || !config.options) {
+    if (!config || !config.options || !config.options.username || !config.options.password || !config.options.countryCode) {
       this.log.log('The config configuration is incorrect, disabling plugin.')
       return;
     }
-    this.deviceAccessories = new Map();
-    this.accessories = new Map();
 
     if (api) {
       // Save the API object as plugin needs to register new accessory via this object
