@@ -54,8 +54,12 @@ class PetkitPlatform {
     );
     this.petkitOpenApi = api;
 
-    await api.login(config.options.username, config.options.password);
-
+    try {
+      await api.login(config.options.username, config.options.password);
+    } catch (e) {
+      this.log.log('Failed to login. Please check if the config.json is correct.')
+      return;
+    }
     try {
       devices = await api.getDeviceList();
     } catch (e) {
