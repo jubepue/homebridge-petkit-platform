@@ -94,6 +94,7 @@ class PetkitPlatform {
       case 'FeederMini':
       case 'D3':
       case 'D4':
+      case 'D4s':
         deviceAccessory = new FeederAccessory(this, homebridgeAccessory, device);
         this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
         this.deviceAccessories.set(uuid, deviceAccessory);
