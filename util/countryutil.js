@@ -1,7 +1,7 @@
-const CHINA = "http://api.petkit.cn/6"
-const INDIA = "http://api.petktasia.com/latest"
-const AMERICA = "http://api.petkt.com/latest"
-const EUROPE = "http://api.petkt.com/latest"
+const CHINA = "https://api.petkit.cn/6"
+const INDIA = "https://api.petktasia.com/latest"
+const AMERICA = "https://api.petkt.com/latest"
+const EUROPE = "https://api.eu-pet.com/latest"
 
 const PETKIT_COUNTRIES = [
     {"country":"Afghanistan", "countryCode":"93", "endPoint":EUROPE},  
@@ -237,13 +237,15 @@ const PETKIT_COUNTRIES = [
 
 class CountryUtil {
 
+    static defaultEndPoint = AMERICA;
+
     constructor() {}
 
     getEndPointWithCountryCode(code) {
         let item = PETKIT_COUNTRIES.find(item => {
             return item.countryCode == code;
         });
-        return item ? item.endPoint : AMERICA;
+        return item ? item.endPoint : CountryUtil.defaultEndPoint;
     }
 }
 
