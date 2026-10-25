@@ -1,7 +1,7 @@
 const CHINA = "http://api.petkit.cn/6"
 const INDIA = "http://api.petktasia.com/latest"
 const AMERICA = "http://api.petkt.com/latest"
-const EUROPE = "http://api.petkt.com/latest"
+const EUROPE = "http://api.eu-pet.com/latest"
 
 const PETKIT_COUNTRIES = [
     {"country":"Afghanistan", "countryCode":"93", "endPoint":EUROPE},  
