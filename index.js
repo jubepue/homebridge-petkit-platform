@@ -19,14 +19,12 @@ module.exports = function (homebridge) {
 
 class PetkitPlatform {
   constructor(log, config, api) {
-    this.log = new LogUtil(
-      config.options.debug,
-    );
     this.config = config;
     if (!config || !config.options) {
-      this.log.log('The config configuration is incorrect, disabling plugin.')
+      log.error('The config configuration is incorrect, disabling plugin.');
       return;
     }
+    this.log = new LogUtil(log, config.options.debug);
     this.deviceAccessories = new Map();
     this.accessories = new Map();
 
@@ -37,7 +35,7 @@ class PetkitPlatform {
       // Platform Plugin should only register new accessory that doesn't exist in homebridge after this event.
       // Or start discover new accessories.
       this.api.on('didFinishLaunching', function () {
-        this.log.log("Initializing PetkitPlatform...");
+        this.log.info("Initializing PetkitPlatform...");
         this.initPetkitSDK(config);
       }.bind(this));
     }
@@ -54,24 +52,23 @@ class PetkitPlatform {
       this.log,
     );
     this.petkitOpenApi = api;
+    this.log.info(`Using Petkit API endpoint: ${api.endpoint}`);
 
     try {
       await api.login(config.options.username, config.options.password);
+      this.log.info('Logged in to Petkit successfully.');
     } catch (e) {
-      this.log.log('Failed to login. Please check if the config.json is correct.')
+      this.log.error(`Failed to login. Please check credentials/region. ${e && e.message ? e.message : e}`);
       return;
     }
     try {
       devices = await api.getDeviceList();
+      this.log.info(`Found ${devices.length} Petkit device(s).`);
+      for (const device of devices) {
+        this.addAccessory(device);
+      }
     } catch (e) {
-      // this.log.log(JSON.stringify(e.message));
-      this.log.log('Failed to get device information. Please check if the config.json is correct.')
-      return;
-    }
-
-    for (const device of devices) {
-      //this.log.log(JSON.stringify(device));  
-      this.addAccessory(device);
+      this.log.error(`Failed to get device information. Will retry on the next poll. ${e && e.message ? e.message : e}`);
     }
 
     let listener = new PetkitListener(api, this.log);
@@ -82,59 +79,71 @@ class PetkitPlatform {
 
   addAccessory(device) {
     var deviceType = device.type;
-    this.log.log(`Adding: ${device.name || 'unnamed'} (${deviceType} / ${device.id})`);
+    this.log.info(`Adding: ${device.name || 'unnamed'} (${deviceType} / ${device.id})`);
     // Get UUID
-    const uuid = this.api.hap.uuid.generate(device.id);
+    const uuid = this.api.hap.uuid.generate(String(device.id));
     const homebridgeAccessory = this.accessories.get(uuid);
 
     // Construct new accessory
     let deviceAccessory;
-    switch (deviceType) {
-      case 'Feeder':
-      case 'FeederMini':
-      case 'D3':
-      case 'D4':
-      case 'D4s':
-        deviceAccessory = new FeederAccessory(this, homebridgeAccessory, device);
-        this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
-        this.deviceAccessories.set(uuid, deviceAccessory);
-        break;
-      default:
-        break;
+    try {
+      switch (deviceType) {
+        case 'Feeder':
+        case 'FeederMini':
+        case 'D3':
+        case 'D4':
+        case 'D4s':
+        case 'D4H':
+        case 'D4SH':
+          deviceAccessory = new FeederAccessory(this, homebridgeAccessory, device);
+          this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+          this.deviceAccessories.set(uuid, deviceAccessory);
+          break;
+        default:
+          this.log.info(`Skipping unsupported device type: ${deviceType}`);
+          break;
+      }
+    } catch (e) {
+      this.log.error(`Failed to add accessory ${device.name || device.id} (${deviceType}): ${e && e.stack ? e.stack : e}`);
     }
   }
 
-  //Handle device deletion, addition, status update
+  // Handle device addition / status update.
+  // Intentionally does NOT unregister accessories when a poll omits them —
+  // unregistering drops them from HomeKit scenes/automations even if re-added
+  // later with the same UUID.
   async onDevicesListener(listener) {
+    if (!Array.isArray(listener)) {
+      this.log.error('Ignoring device update: expected an array.');
+      return;
+    }
+    if (listener.length === 0) {
+      this.log.info('Device poll returned 0 devices; leaving existing accessories in place.');
+      return;
+    }
+
     for (const device of listener) {
-      let uuid = this.api.hap.uuid.generate(device.id);
+      const uuid = this.api.hap.uuid.generate(String(device.id));
       if (this.accessories.has(uuid)) {
         this.refreshDeviceStates(device);
       } else {
         this.addAccessory(device);
       }
     }
-    for (const uuid of this.accessories.keys()) {
-      let found = listener.find(x => this.api.hap.uuid.generate(x.id) == uuid);
-      if (!found) {
-        let homebridgeAccessory = this.accessories.get(uuid);
-        this.removeAccessory(homebridgeAccessory);
-      }
-    }
   }
 
   //refresh Accessorie status
   async refreshDeviceStates(message) {
-    const uuid = this.api.hap.uuid.generate(message.id);
+    const uuid = this.api.hap.uuid.generate(String(message.id));
     const deviceAccessorie = this.deviceAccessories.get(uuid);
     if (deviceAccessorie) {
-      deviceAccessorie.updateState(message);
+      deviceAccessorie.updateAccessory(message);
     }
   }
 
   // Called from device classes
   registerPlatformAccessory(platformAccessory) {
-    this.log.log(`Register Platform Accessory ${platformAccessory.displayName}`);
+    this.log.info(`Register Platform Accessory ${platformAccessory.displayName}`);
     this.api.registerPlatformAccessories(pluginName, platformName, [platformAccessory]);
   }
 
@@ -152,16 +161,6 @@ class PetkitPlatform {
       callback();
     });
     this.accessories.set(accessory.UUID, accessory);
-  }
-
-  // Sample function to show how developer can remove accessory dynamically from outside event
-  removeAccessory(accessory) {
-    if (accessory) {
-      this.log.log(`Remove Accessory ${accessory.displayName}`);
-      this.api.unregisterPlatformAccessories(pluginName, platformName, [accessory]);
-      this.accessories.delete(accessory.UUID);
-      this.deviceAccessories.delete(accessory.UUID);
-    }
   }
 
 }

@@ -237,13 +237,15 @@ const PETKIT_COUNTRIES = [
 
 class CountryUtil {
 
+    static defaultEndPoint = AMERICA;
+
     constructor() {}
 
     getEndPointWithCountryCode(code) {
         let item = PETKIT_COUNTRIES.find(item => {
             return item.countryCode == code;
         });
-        return item ? item.endPoint : AMERICA;
+        return item ? item.endPoint : CountryUtil.defaultEndPoint;
     }
 }
 

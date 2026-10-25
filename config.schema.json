@@ -2,8 +2,7 @@
   "pluginAlias": "PetkitPlatform",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "For documentation please see https://github.com/jubepue/petkit-homebridge .",
-  "footerDisplay": "",
+  "headerDisplay": "For documentation please see https://github.com/jubepue/homebridge-petkit-platform .",
   "schema": {
     "type": "object",
     "properties": {
@@ -15,7 +14,7 @@
         "description": "You shouldn't need to change this."
       },
       "options": {
-        "title": "",
+        "title": "Petkit Account",
         "type": "object",
         "required": true,
         "properties": {
@@ -40,8 +39,27 @@
             "title": "Country Code",
             "type": "number",
             "default": "",
-            "description": "Your two integer country code",
+            "description": "Your phone country calling code (e.g. 44 for UK, 1 for US). Used to pick the API region.",
             "required": true
+          },
+          "defaultFanSpeed": {
+            "title": "Default Fan Speed (%)",
+            "type": "number",
+            "default": 40,
+            "description": "Initial fan speed when Homebridge starts (also used if you only toggle Food Dispenser). Default 40%. How % maps to grams depends on the feeder model — see [Feeding in HomeKit](https://github.com/georgegillams/homebridge-petkit-platform/blob/master/README.md#feeding-in-homekit).",
+            "required": false,
+            "oneOf": [
+              { "title": "10%", "enum": [10] },
+              { "title": "20%", "enum": [20] },
+              { "title": "30%", "enum": [30] },
+              { "title": "40%", "enum": [40] },
+              { "title": "50%", "enum": [50] },
+              { "title": "60%", "enum": [60] },
+              { "title": "70%", "enum": [70] },
+              { "title": "80%", "enum": [80] },
+              { "title": "90%", "enum": [90] },
+              { "title": "100%", "enum": [100] }
+            ]
           },
           "debug": {
             "title": "Enable Debug Logging",
